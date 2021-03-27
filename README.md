@@ -1,5 +1,3 @@
 # Day2day
 
-Just run this webpage and add your today's tasks with timing
-
-you're good to go
+Just run this webpage, add your today's tasks with timing and you're good to go

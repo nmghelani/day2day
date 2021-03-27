@@ -1,5 +1,9 @@
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
+import Popup from "./Components/Popup";
 import "./App.css";
+import TimePicker from "react-time-picker";
+import { Button, InputGroup, FormControl, Dropdown } from "react-bootstrap";
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function getTimeInNumber(date) {
   var hours = date.getHours();
@@ -38,37 +42,74 @@ function getTimeString(date) {
   var a;
   if (hour >= 12) {
     a = "PM";
-    hour -= 12;
+    if (hour != 12) hour -= 12;
   } else {
     a = "AM";
+    if (hour == 0) hour = 12;
   }
   return hour + ":" + min + " " + a;
 }
 
+function getTimeMap(stringTime) {
+  var splitByColon = stringTime.split(":");
+  var splitBySpace = splitByColon[1].split(" ");
+  var hour = Number(splitByColon[0]);
+  if (splitBySpace[1] == "PM") {
+    if (hour != 12) {
+      hour += 12;
+    }
+  } else {
+    if (hour == 12) {
+      hour = 0;
+    }
+  }
+  return {
+    hour: hour,
+    min: Number(splitBySpace[0]),
+  };
+}
+
+function useInterval(callback, delay) {
+  const savedCallback = useRef();
+
+  // Remember the latest callback.
+  useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
+
+  // Set up the interval.
+  useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
+
 function App() {
-  const data = [
-    {
-      start: new Date(2021, 2, 27, 14, 53, 0, 0),
-      end: new Date(2021, 2, 27, 14, 54, 0, 0),
-      task: "Dcoder",
-    },
-    {
-      start: new Date(2021, 2, 27, 14, 55, 0, 0),
-      end: new Date(2021, 2, 27, 14, 56, 0, 0),
-      task: "Android",
-    },
-  ];
-  var start_time = data[0]["start"];
-  var end_time = data[data.length - 1]["end"];
-  const [title, setTitle] = React.useState("Free-time");
-  const [progress, setProgress] = React.useState(0);
-  const [time, setTime] = React.useState(new Date());
-  setInterval(() => {
+  const [tasks, setTasks] = useState([]);
+  const [start_time, setStartTime] = useState(new Date());
+  const [end_time, setEndTime] = useState(new Date());
+  const [title, setTitle] = useState("Free-time");
+  const [progress, setProgress] = useState(0);
+  const [time, setTime] = useState(new Date());
+  const [showPopup, setShowPopup] = useState(true);
+  const [fromDay, setFromDay] = useState("Today");
+  const [toDay, setToDay] = useState("Today");
+
+  const [task, setTask] = useState("");
+  const [fromTime, setFromTime] = useState("");
+  const [toTime, setToTime] = useState("");
+
+  useInterval(() => {
     var date = new Date();
     setTime(date);
 
     var found = false;
-    data.map((task) => {
+    tasks.map((task) => {
       if (
         date.getTime() >= task["start"].getTime() &&
         date.getTime() <= task["end"].getTime()
@@ -82,14 +123,14 @@ function App() {
       setTitle("Free-time");
     }
     setProgress(getPerc(date, start_time, end_time));
-  }, 1000);
+  });
   return (
     <div className="App">
       <div className="content">
         <h1>{time.toLocaleString()}</h1>
         <h1>{title}</h1>
         <div className="timeline">
-          {data.map((task, index) => {
+          {tasks.map((task, index) => {
             return (
               <div>
                 <div
@@ -112,7 +153,7 @@ function App() {
           <div className="pointer" style={{ marginLeft: progress + "%" }}></div>
         </div>
         <div className="time-container">
-          {data.map((task, index) => {
+          {tasks.map((task, index) => {
             return (
               <div>
                 <div
@@ -137,7 +178,178 @@ function App() {
             );
           })}
         </div>
+
+        <Button
+          className="add-new-btn"
+          onClick={() => {
+            setShowPopup(true);
+          }}
+        >
+          Add
+        </Button>
       </div>
+
+      <div className="list-container">
+        <ul className="list">
+          {tasks.map((task) => {
+            return (
+              <li>
+                {getTimeString(task.start) +
+                  " - " +
+                  getTimeString(task.end) +
+                  " " +
+                  task.task}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+
+      <Popup trigger={showPopup}>
+        <div>
+          <h2>New task</h2>
+          <InputGroup className="mb-3">
+            <InputGroup.Prepend>
+              <InputGroup.Text className="min-width80" id="basic-addon1">
+                Task
+              </InputGroup.Text>
+            </InputGroup.Prepend>
+            <FormControl
+              placeholder="Task to perform"
+              aria-label="Task to perform"
+              aria-describedby="basic-addon1"
+              onChange={(e) => setTask(e.target.value)}
+            />
+          </InputGroup>
+          <InputGroup className="mb-3">
+            <InputGroup.Prepend>
+              <InputGroup.Text className="min-width80" id="basic-addon1">
+                From
+              </InputGroup.Text>
+            </InputGroup.Prepend>
+            <FormControl
+              placeholder="11:00 AM"
+              aria-label="11:00 AM"
+              aria-describedby="basic-addon1"
+              onChange={(e) => {
+                setFromTime(e.target.value);
+              }}
+            />
+            <Dropdown>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                {fromDay}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  onClick={() => {
+                    setFromDay("Today");
+                  }}
+                >
+                  Today
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => {
+                    setFromDay("Tomorrow");
+                  }}
+                >
+                  Tomorrow
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </InputGroup>
+          <InputGroup className="mb-3">
+            <InputGroup.Prepend>
+              <InputGroup.Text className="min-width80" id="basic-addon1">
+                To
+              </InputGroup.Text>
+            </InputGroup.Prepend>
+            <FormControl
+              onChange={(e) => {
+                setToTime(e.target.value);
+              }}
+              placeholder="11:00 AM"
+              aria-label="11:00 AM"
+              aria-describedby="basic-addon1"
+            />
+            <Dropdown>
+              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                {toDay}
+              </Dropdown.Toggle>
+
+              <Dropdown.Menu>
+                <Dropdown.Item
+                  onClick={() => {
+                    setToDay("Today");
+                  }}
+                >
+                  Today
+                </Dropdown.Item>
+                <Dropdown.Item
+                  onClick={() => {
+                    setToDay("Tomorrow");
+                  }}
+                >
+                  Tomorrow
+                </Dropdown.Item>
+              </Dropdown.Menu>
+            </Dropdown>
+          </InputGroup>
+          <InputGroup className="btn-input-group">
+            <Button
+              className="add-btn"
+              onClick={() => {
+                var curr = new Date();
+                var start = new Date(curr);
+                var end = new Date(curr);
+
+                var time = getTimeMap(fromTime);
+                if (fromDay != "Today") {
+                  start.setDate(curr.getDate() + 1);
+                }
+                start.setHours(time["hour"]);
+                start.setMinutes(time["min"]);
+                start.setSeconds(0);
+
+                time = getTimeMap(toTime);
+                if (toDay != "Today") {
+                  end.setDate(curr.getDate() + 1);
+                }
+                end.setHours(time["hour"]);
+                end.setMinutes(time["min"]);
+                end.setSeconds(0);
+
+                setTasks((data) => [
+                  ...data,
+                  {
+                    start: start,
+                    end: end,
+                    task: task,
+                  },
+                ]);
+                setStartTime(
+                  fromDay == "Today" && start < start_time ? start : start_time
+                );
+                setEndTime(
+                  fromDay == "Today" && end > end_time ? end : end_time
+                );
+                setShowPopup(false);
+              }}
+            >
+              Add
+            </Button>
+            <Button
+              variant="danger"
+              className="close-btn"
+              onClick={() => {
+                setShowPopup(false);
+              }}
+            >
+              Close
+            </Button>
+          </InputGroup>
+        </div>
+      </Popup>
     </div>
   );
 }
