@@ -131,6 +131,9 @@ function App() {
     if (!found) {
       setTitle("Free-time");
     }
+    if (tasks.length == 0) {
+      setTitle("Do something b**ch");
+    }
     setProgress(getPerc(date, start_time, end_time));
   });
   return (
