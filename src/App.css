@@ -31,7 +31,7 @@
 .timeline {
   position: relative;
   height: 10px;
-  background: rgb(0, 162, 255);
+  background: rgb(103 200 255);
   border-radius: 10px;
 }
 
@@ -44,14 +44,28 @@
 
 .pointer {
   position: absolute;
-  border-radius: 10px;
-  background: rgb(255, 33, 33);
-  height: 10px;
-  width: 10px;
+  border-radius: 25px;
+  background: rgb(255, 83, 83);
+  height: 25px;
+  width: 25px;
+  margin-top: -8px;
+}
+
+.timer {
+  margin-top: 20px;
+  font-size: 5vh;
+  color: aliceblue;
+}
+
+.title {
+  margin-bottom: 5%;
+  font-size: 15vh;
+  color: aliceblue;
 }
 
 .time {
   position: absolute;
+  color: aliceblue;
 }
 
 .add-btn {
@@ -64,6 +78,7 @@
 
 .time-container {
   position: relative;
+  margin-top: 5px;
 }
 
 .btn-input-group {
@@ -72,19 +87,21 @@
 
 .break-point {
   position: absolute;
-  border-radius: 10px;
-  background: rgb(0, 38, 255);
+  background: rgb(0, 0, 255);
   height: 10px;
-  width: 10px;
+  width: 5px;
 }
 
 .list {
-  width: 20%;
+  width: auto;
 }
 
 .list-container {
   display: flex;
   justify-content: center;
+  text-align: left;
+  margin-top: 20px;
+  color: aliceblue;
 }
 
 .App-logo {

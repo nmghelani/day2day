@@ -25,8 +25,8 @@ function getPerc(curr_time, start_time, end_time) {
     perc = 100;
   }
   perc -= 1;
-  if (perc < 0) {
-    perc = 0;
+  if (perc <= 0) {
+    perc = 0.5;
   }
   return perc;
 }
@@ -126,9 +126,9 @@ function App() {
   });
   return (
     <div className="App">
+      <h1 className="timer">{time.toLocaleString()}</h1>
       <div className="content">
-        <h1>{time.toLocaleString()}</h1>
-        <h1>{title}</h1>
+        <h1 className="title">{title}</h1>
         <div className="timeline">
           {tasks.map((task, index) => {
             return (
@@ -187,22 +187,21 @@ function App() {
         >
           Add
         </Button>
-      </div>
-
-      <div className="list-container">
-        <ul className="list">
-          {tasks.map((task) => {
-            return (
-              <li>
-                {getTimeString(task.start) +
-                  " - " +
-                  getTimeString(task.end) +
-                  " " +
-                  task.task}
-              </li>
-            );
-          })}
-        </ul>
+        <div className="list-container">
+          <ul className="list">
+            {tasks.map((task) => {
+              return (
+                <li>
+                  {getTimeString(task.start) +
+                    " - " +
+                    getTimeString(task.end) +
+                    " " +
+                    task.task}
+                </li>
+              );
+            })}
+          </ul>
+        </div>
       </div>
 
       <Popup trigger={showPopup}>
@@ -215,8 +214,8 @@ function App() {
               </InputGroup.Text>
             </InputGroup.Prepend>
             <FormControl
-              placeholder="Task to perform"
-              aria-label="Task to perform"
+              placeholder="Task to be performed"
+              aria-label="Task to be performed"
               aria-describedby="basic-addon1"
               onChange={(e) => setTask(e.target.value)}
             />
