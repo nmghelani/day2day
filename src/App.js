@@ -2,7 +2,13 @@ import React, { useState, useEffect, useRef } from "react";
 import Popup from "./Components/Popup";
 import "./App.css";
 import TimePicker from "react-time-picker";
-import { Button, InputGroup, FormControl, Dropdown } from "react-bootstrap";
+import {
+  Form,
+  Button,
+  InputGroup,
+  FormControl,
+  Dropdown,
+} from "react-bootstrap";
 import "bootstrap/dist/css/bootstrap.min.css";
 
 function getTimeInNumber(date) {
@@ -54,7 +60,7 @@ function getTimeMap(stringTime) {
   var splitByColon = stringTime.split(":");
   var splitBySpace = splitByColon[1].split(" ");
   var hour = Number(splitByColon[0]);
-  if (splitBySpace[1] == "PM") {
+  if (splitBySpace[1].toLowerCase() == "pm") {
     if (hour != 12) {
       hour += 12;
     }
@@ -99,10 +105,13 @@ function App() {
   const [showPopup, setShowPopup] = useState(true);
   const [fromDay, setFromDay] = useState("Today");
   const [toDay, setToDay] = useState("Today");
+  const [validated, setValidated] = useState();
 
   const [task, setTask] = useState("");
   const [fromTime, setFromTime] = useState("");
   const [toTime, setToTime] = useState("");
+  const [fromTimeError, setFromTimeError] = useState(null);
+  const [toTimeError, setToTimeError] = useState(null);
 
   useInterval(() => {
     var date = new Date();
@@ -182,6 +191,14 @@ function App() {
         <Button
           className="add-new-btn"
           onClick={() => {
+            setTask("");
+            setFromTime("");
+            setToTime("");
+            setFromTimeError("");
+            setToTimeError("");
+            setFromDay("Today");
+            setToDay("Today");
+            setValidated(null);
             setShowPopup(true);
           }}
         >
@@ -207,146 +224,212 @@ function App() {
       <Popup trigger={showPopup}>
         <div>
           <h2>New task</h2>
-          <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text className="min-width80" id="basic-addon1">
-                Task
-              </InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              placeholder="Task to be performed"
-              aria-label="Task to be performed"
-              aria-describedby="basic-addon1"
-              onChange={(e) => setTask(e.target.value)}
-            />
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text className="min-width80" id="basic-addon1">
-                From
-              </InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              placeholder="11:00 AM"
-              aria-label="11:00 AM"
-              aria-describedby="basic-addon1"
-              onChange={(e) => {
-                setFromTime(e.target.value);
-              }}
-            />
-            <Dropdown>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                {fromDay}
-              </Dropdown.Toggle>
+          <Form noValidate>
+            <InputGroup hasValidation>
+              <InputGroup.Prepend>
+                <InputGroup.Text className="min-width80" id="basic-addon1">
+                  Task
+                </InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl
+                placeholder="Task to be performed"
+                aria-label="Task to be performed"
+                aria-describedby="basic-addon1"
+                onChange={(e) => setTask(e.target.value)}
+                isInvalid={validated != null && task == ""}
+              />
+              <FormControl.Feedback type="invalid" className="ta-left">
+                Please enter a task
+              </FormControl.Feedback>
+            </InputGroup>
+            <Form.Text className="mb-3 text-muted ta-left">
+              Short title to be displayed
+            </Form.Text>
+            <InputGroup>
+              <InputGroup.Prepend>
+                <InputGroup.Text className="min-width80" id="basic-addon1">
+                  From
+                </InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl
+                placeholder="11:00 AM"
+                aria-label="11:00 AM"
+                aria-describedby="basic-addon1"
+                onChange={(e) => {
+                  setFromTime(e.target.value);
+                  setFromTimeError("");
+                }}
+                isInvalid={fromTimeError != null && fromTimeError !== ""}
+              />
+              <Dropdown>
+                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  {fromDay}
+                </Dropdown.Toggle>
 
-              <Dropdown.Menu>
-                <Dropdown.Item
-                  onClick={() => {
-                    setFromDay("Today");
-                  }}
-                >
-                  Today
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => {
-                    setFromDay("Tomorrow");
-                  }}
-                >
-                  Tomorrow
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </InputGroup>
-          <InputGroup className="mb-3">
-            <InputGroup.Prepend>
-              <InputGroup.Text className="min-width80" id="basic-addon1">
-                To
-              </InputGroup.Text>
-            </InputGroup.Prepend>
-            <FormControl
-              onChange={(e) => {
-                setToTime(e.target.value);
-              }}
-              placeholder="11:00 AM"
-              aria-label="11:00 AM"
-              aria-describedby="basic-addon1"
-            />
-            <Dropdown>
-              <Dropdown.Toggle variant="secondary" id="dropdown-basic">
-                {toDay}
-              </Dropdown.Toggle>
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    onClick={() => {
+                      setFromDay("Today");
+                    }}
+                  >
+                    Today
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={() => {
+                      setFromDay("Tomorrow");
+                    }}
+                  >
+                    Tomorrow
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+              <FormControl.Feedback type="invalid" className="ta-left">
+                {fromTimeError}
+              </FormControl.Feedback>
+            </InputGroup>
+            <Form.Text className="mb-3 text-muted ta-left">
+              Write from time in hh:mm a format (e.g. 11:00 AM)
+            </Form.Text>
+            <InputGroup>
+              <InputGroup.Prepend>
+                <InputGroup.Text className="min-width80" id="basic-addon1">
+                  To
+                </InputGroup.Text>
+              </InputGroup.Prepend>
+              <FormControl
+                onChange={(e) => {
+                  setToTime(e.target.value);
+                  setToTimeError("");
+                }}
+                placeholder="11:00 AM"
+                aria-label="11:00 AM"
+                aria-describedby="basic-addon1"
+                isInvalid={toTimeError != null && toTimeError !== ""}
+              />
+              <Dropdown>
+                <Dropdown.Toggle variant="secondary" id="dropdown-basic">
+                  {toDay}
+                </Dropdown.Toggle>
 
-              <Dropdown.Menu>
-                <Dropdown.Item
-                  onClick={() => {
-                    setToDay("Today");
-                  }}
-                >
-                  Today
-                </Dropdown.Item>
-                <Dropdown.Item
-                  onClick={() => {
-                    setToDay("Tomorrow");
-                  }}
-                >
-                  Tomorrow
-                </Dropdown.Item>
-              </Dropdown.Menu>
-            </Dropdown>
-          </InputGroup>
-          <InputGroup className="btn-input-group">
-            <Button
-              className="add-btn"
-              onClick={() => {
-                var curr = new Date();
-                var start = new Date(curr);
-                var end = new Date(curr);
+                <Dropdown.Menu>
+                  <Dropdown.Item
+                    onClick={() => {
+                      setToDay("Today");
+                    }}
+                  >
+                    Today
+                  </Dropdown.Item>
+                  <Dropdown.Item
+                    onClick={() => {
+                      setToDay("Tomorrow");
+                    }}
+                  >
+                    Tomorrow
+                  </Dropdown.Item>
+                </Dropdown.Menu>
+              </Dropdown>
+              <FormControl.Feedback type="invalid" className="ta-left">
+                {toTimeError}
+              </FormControl.Feedback>
+            </InputGroup>
+            <Form.Text className="mb-3 text-muted ta-left">
+              Write to time in hh:mm a format (e.g. 11:00 AM)
+            </Form.Text>
+            <InputGroup className="btn-input-group">
+              <Button
+                className="add-btn"
+                onClick={() => {
+                  if (task === null || task === "") {
+                    setValidated(false);
+                    return;
+                  } else if (fromTime === null || fromTime === "") {
+                    setValidated(false);
+                    setFromTimeError("Please enter start time");
+                    return;
+                  } else if (
+                    !fromTime.includes(":") ||
+                    !fromTime.includes(" ") ||
+                    (!fromTime.toLowerCase().includes("am") &&
+                      !fromTime.toLowerCase().includes("pm")) ||
+                    fromTime.length < 6 ||
+                    fromTime.length > 8
+                  ) {
+                    setFromTimeError("Please enter valid start time");
+                    setValidated(false);
+                    return;
+                  } else if (toTime === null || toTime === "") {
+                    setValidated(false);
+                    setToTimeError("Please enter end time");
+                    return;
+                  } else if (
+                    !toTime.includes(":") ||
+                    !toTime.includes(" ") ||
+                    (!toTime.toLowerCase().includes("am") &&
+                      !toTime.toLowerCase().includes("pm")) ||
+                    toTime.length < 6 ||
+                    toTime.length > 8
+                  ) {
+                    setToTimeError("Please enter valid end time");
+                    setValidated(false);
+                    return;
+                  }
 
-                var time = getTimeMap(fromTime);
-                if (fromDay != "Today") {
-                  start.setDate(curr.getDate() + 1);
-                }
-                start.setHours(time["hour"]);
-                start.setMinutes(time["min"]);
-                start.setSeconds(0);
+                  setFromTimeError("");
+                  setToTimeError("");
+                  setValidated(true);
 
-                time = getTimeMap(toTime);
-                if (toDay != "Today") {
-                  end.setDate(curr.getDate() + 1);
-                }
-                end.setHours(time["hour"]);
-                end.setMinutes(time["min"]);
-                end.setSeconds(0);
+                  var curr = new Date();
+                  var start = new Date(curr);
+                  var end = new Date(curr);
 
-                setTasks((data) => [
-                  ...data,
-                  {
-                    start: start,
-                    end: end,
-                    task: task,
-                  },
-                ]);
-                setStartTime(
-                  fromDay == "Today" && start < start_time ? start : start_time
-                );
-                setEndTime(
-                  fromDay == "Today" && end > end_time ? end : end_time
-                );
-                setShowPopup(false);
-              }}
-            >
-              Add
-            </Button>
-            <Button
-              variant="danger"
-              className="close-btn"
-              onClick={() => {
-                setShowPopup(false);
-              }}
-            >
-              Close
-            </Button>
-          </InputGroup>
+                  var time = getTimeMap(fromTime);
+                  if (fromDay != "Today") {
+                    start.setDate(curr.getDate() + 1);
+                  }
+                  start.setHours(time["hour"]);
+                  start.setMinutes(time["min"]);
+                  start.setSeconds(0);
+
+                  time = getTimeMap(toTime);
+                  if (toDay != "Today") {
+                    end.setDate(curr.getDate() + 1);
+                  }
+                  end.setHours(time["hour"]);
+                  end.setMinutes(time["min"]);
+                  end.setSeconds(0);
+
+                  if (start >= end) {
+                    setToTimeError("End time must be greater than start time");
+                    setValidated(false);
+                    return;
+                  }
+                  setValidated(true);
+                  setTasks((data) => [
+                    ...data,
+                    {
+                      start: start,
+                      end: end,
+                      task: task,
+                    },
+                  ]);
+                  setStartTime(start < start_time ? start : start_time);
+                  setEndTime(end > end_time ? end : end_time);
+                  setShowPopup(false);
+                }}
+              >
+                Add
+              </Button>
+              <Button
+                variant="danger"
+                className="close-btn"
+                onClick={() => {
+                  setShowPopup(false);
+                }}
+              >
+                Close
+              </Button>
+            </InputGroup>
+          </Form>
         </div>
       </Popup>
     </div>

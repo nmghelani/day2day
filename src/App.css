@@ -42,6 +42,10 @@
 .close-btn {
 }
 
+.ta-left {
+  text-align: left;
+}
+
 .pointer {
   position: absolute;
   border-radius: 25px;
