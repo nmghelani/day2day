@@ -17,6 +17,17 @@ function getTimeInNumber(date) {
   return p;
 }
 
+window.onbeforeunload = (event) => {
+  if (!window.confirm("Are you sure? Your task list will be cleared.")) {
+    const e = event || window.event;
+    e.preventDefault();
+    if (e) {
+      e.returnValue = "";
+    }
+    return "";
+  }
+};
+
 function getPerc(curr_time, start_time, end_time) {
   var currdiff = getTimeInNumber(curr_time) - getTimeInNumber(start_time);
   if (currdiff < 0) {
